@@ -2,17 +2,26 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 
+import models from './models'
+import routes from './routes'
+
 const app = express()
 
 app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-app.get('/', (request, response) => {
-    response.send('Hello Dunia')
+app.use((req, res, next) => {
+    req.context = {
+        models,
+        me: models.users[1]
+    };
+    next()
 })
 
-app.get('/test', (request, response, next) => {
-    response.send({msg: 'this is cors enabled for all origins'})
-})
+app.use('/session', routes.session)
+app.use('/users', routes.user)
+app.use('/messages', routes.message)
 
 app.listen(process.env.PORT, () => {
     console.log(`This app is running on port ${process.env.PORT}`)
